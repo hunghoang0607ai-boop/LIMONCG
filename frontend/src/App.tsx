@@ -4,11 +4,15 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { Toaster } from 'react-hot-toast';
 import theme from './theme';
 
-// Pages (to be created)
+// Pages
 import HomePage from '@pages/public/HomePage';
 import LoginPage from '@pages/auth/LoginPage';
 import RegisterPage from '@pages/auth/RegisterPage';
+import VerifyEmailPage from '@pages/auth/VerifyEmailPage';
+import ForgotPasswordPage from '@pages/auth/ForgotPasswordPage';
+import ResetPasswordPage from '@pages/auth/ResetPasswordPage';
 import DashboardPage from '@pages/student/DashboardPage';
+import ProfilePage from '@pages/student/ProfilePage';
 
 // Layout components (to be created)
 import PublicLayout from '@components/layouts/PublicLayout';
@@ -55,7 +59,12 @@ function App() {
           <Route element={<AuthLayout />}>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           </Route>
+
+          {/* Public Auth Routes (no layout) */}
+          <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
+          <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
           {/* Student Routes - Protected */}
           <Route
@@ -66,6 +75,7 @@ function App() {
             }
           >
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
             {/* More student routes will be added here */}
           </Route>
 

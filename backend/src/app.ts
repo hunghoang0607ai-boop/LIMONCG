@@ -7,9 +7,9 @@ import { errorHandler, notFound } from './middleware/errorHandler';
 import env from './config/env';
 import logger from './config/logger';
 
-// Routes (to be implemented)
-// import authRoutes from './routes/auth.routes';
-// import userRoutes from './routes/user.routes';
+// Routes
+import authRoutes from './routes/auth.routes';
+import userRoutes from './routes/user.routes';
 // import examRoutes from './routes/exam.routes';
 
 const app: Application = express();
@@ -65,9 +65,8 @@ app.get('/health', (_req, res) => {
 // API Routes
 const API_PREFIX = `/api/${env.API_VERSION}`;
 
-// TODO: Uncomment when routes are implemented
-// app.use(`${API_PREFIX}/auth`, authRoutes);
-// app.use(`${API_PREFIX}/users`, userRoutes);
+app.use(`${API_PREFIX}/auth`, authRoutes);
+app.use(`${API_PREFIX}/users`, userRoutes);
 // app.use(`${API_PREFIX}/exams`, examRoutes);
 
 // Welcome route
