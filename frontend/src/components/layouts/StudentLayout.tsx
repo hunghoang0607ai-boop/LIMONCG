@@ -21,6 +21,8 @@ import {
   Assessment as AssessmentIcon,
   AccountCircle as AccountIcon,
   Logout as LogoutIcon,
+  Stars as StarsIcon,
+  History as HistoryIcon,
 } from '@mui/icons-material';
 import { useState } from 'react';
 import { useAppSelector, useAppDispatch } from '@store/index';
@@ -51,6 +53,8 @@ const StudentLayout = () => {
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
     { text: 'Exams', icon: <SchoolIcon />, path: '/exams' },
     { text: 'My Results', icon: <AssessmentIcon />, path: '/results' },
+    { text: 'Buy Credits', icon: <StarsIcon />, path: '/credits/purchase' },
+    { text: 'Transactions', icon: <HistoryIcon />, path: '/credits/history' },
     { text: 'Profile', icon: <AccountIcon />, path: '/profile' },
   ];
 

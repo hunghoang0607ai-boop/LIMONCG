@@ -13,6 +13,9 @@ import ForgotPasswordPage from '@pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from '@pages/auth/ResetPasswordPage';
 import DashboardPage from '@pages/student/DashboardPage';
 import ProfilePage from '@pages/student/ProfilePage';
+import CreditPurchasePage from '@pages/student/CreditPurchasePage';
+import CreditSuccessPage from '@pages/student/CreditSuccessPage';
+import TransactionHistoryPage from '@pages/student/TransactionHistoryPage';
 
 // Layout components (to be created)
 import PublicLayout from '@components/layouts/PublicLayout';
@@ -76,6 +79,9 @@ function App() {
           >
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/credits/purchase" element={<CreditPurchasePage />} />
+            <Route path="/credits/success" element={<CreditSuccessPage />} />
+            <Route path="/credits/history" element={<TransactionHistoryPage />} />
             {/* More student routes will be added here */}
           </Route>
 
