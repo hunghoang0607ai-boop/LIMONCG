@@ -1,0 +1,342 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USER MANAGEMENT
+// ============================================
+
+enum UserRole {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum DifficultyLevel {
+  A1
+  A2
+  B1
+  B2
+  C1
+  C2
+}
+
+model User {
+  id                String    @id @default(uuid())
+  email             String    @unique
+  passwordHash      String    @map("password_hash")
+  fullName          String    @map("full_name")
+  role              UserRole  @default(STUDENT)
+  credits           Int       @default(0)
+  currentLevel      DifficultyLevel? @map("current_level")
+  isEmailVerified   Boolean   @default(false) @map("is_email_verified")
+  emailVerifyToken  String?   @map("email_verify_token")
+  resetPasswordToken String?  @map("reset_password_token")
+  resetPasswordExpires DateTime? @map("reset_password_expires")
+  avatar            String?
+  phone             String?
+  dateOfBirth       DateTime? @map("date_of_birth")
+  country           String?
+  lastLoginAt       DateTime? @map("last_login_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  examAttempts      ExamAttempt[]
+  creditTransactions CreditTransaction[]
+  paymentOrders     PaymentOrder[]
+  learningPath      LearningPath?
+  createdExams      Exam[]       @relation("ExamCreator")
+  refreshTokens     RefreshToken[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+// ============================================
+// EXAM MANAGEMENT
+// ============================================
+
+enum ExamCategory {
+  IELTS
+  PTE
+  TOEIC
+  FLYER
+  MOVER
+  STARTERS
+  KET
+  PET
+  FCE
+  CAE
+  CPE
+}
+
+model Exam {
+  id                String         @id @default(uuid())
+  category          ExamCategory
+  title             String
+  description       String?        @db.Text
+  difficultyLevel   DifficultyLevel @map("difficulty_level")
+  durationMinutes   Int            @map("duration_minutes")
+  creditCost        Int            @default(0) @map("credit_cost")
+  isDemo            Boolean        @default(false) @map("is_demo")
+  isPlacementTest   Boolean        @default(false) @map("is_placement_test")
+  totalQuestions    Int            @default(0) @map("total_questions")
+  passingScore      Float          @map("passing_score")
+  thumbnail         String?
+  instructions      String?        @db.Text
+  isPublished       Boolean        @default(false) @map("is_published")
+  createdById       String         @map("created_by_id")
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
+
+  // Relations
+  createdBy         User           @relation("ExamCreator", fields: [createdById], references: [id])
+  questions         Question[]
+  examAttempts      ExamAttempt[]
+
+  @@index([category])
+  @@index([isDemo])
+  @@index([isPlacementTest])
+  @@index([isPublished])
+  @@map("exams")
+}
+
+// ============================================
+// QUESTION BANK
+// ============================================
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  FILL_BLANK
+  MATCHING
+  ESSAY
+  TRUE_FALSE
+  SHORT_ANSWER
+  LISTENING_MCQ
+  READING_MCQ
+}
+
+enum ExamSection {
+  READING
+  WRITING
+  LISTENING
+  SPEAKING
+  GRAMMAR
+  VOCABULARY
+}
+
+model Question {
+  id              String         @id @default(uuid())
+  examId          String         @map("exam_id")
+  section         ExamSection
+  questionType    QuestionType   @map("question_type")
+  questionText    Json           @map("question_text") // Rich text content
+  mediaUrl        String?        @map("media_url") // Audio/Image URL
+  mediaType       String?        @map("media_type") // audio/image/video
+  options         Json?          // Array of options for MCQ
+  correctAnswer   Json           @map("correct_answer") // Correct answer(s)
+  explanation     String?        @db.Text // Explanation for answer
+  points          Float          @default(1)
+  orderIndex      Int            @map("order_index")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  // Relations
+  exam            Exam           @relation(fields: [examId], references: [id], onDelete: Cascade)
+  studentAnswers  StudentAnswer[]
+
+  @@index([examId])
+  @@index([section])
+  @@map("questions")
+}
+
+// ============================================
+// EXAM ATTEMPTS
+// ============================================
+
+enum AttemptStatus {
+  IN_PROGRESS
+  COMPLETED
+  ABANDONED
+}
+
+model ExamAttempt {
+  id                String         @id @default(uuid())
+  userId            String         @map("user_id")
+  examId            String         @map("exam_id")
+  startedAt         DateTime       @default(now()) @map("started_at")
+  submittedAt       DateTime?      @map("submitted_at")
+  totalScore        Float?         @map("total_score")
+  maxScore          Float?         @map("max_score")
+  percentage        Float?
+  timeSpentSeconds  Int?           @map("time_spent_seconds")
+  status            AttemptStatus  @default(IN_PROGRESS)
+
+  // Section scores
+  readingScore      Float?         @map("reading_score")
+  writingScore      Float?         @map("writing_score")
+  listeningScore    Float?         @map("listening_score")
+  speakingScore     Float?         @map("speaking_score")
+  grammarScore      Float?         @map("grammar_score")
+  vocabularyScore   Float?         @map("vocabulary_score")
+
+  // Relations
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exam              Exam           @relation(fields: [examId], references: [id], onDelete: Cascade)
+  studentAnswers    StudentAnswer[]
+
+  @@index([userId])
+  @@index([examId])
+  @@index([status])
+  @@map("exam_attempts")
+}
+
+model StudentAnswer {
+  id                String         @id @default(uuid())
+  attemptId         String         @map("attempt_id")
+  questionId        String         @map("question_id")
+  answer            Json           // Student's answer
+  isCorrect         Boolean?       @map("is_correct")
+  pointsEarned      Float          @default(0) @map("points_earned")
+  timeSpentSeconds  Int?           @map("time_spent_seconds")
+  createdAt         DateTime       @default(now()) @map("created_at")
+
+  // Relations
+  attempt           ExamAttempt    @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question          Question       @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, questionId])
+  @@index([attemptId])
+  @@map("student_answers")
+}
+
+// ============================================
+// CREDIT SYSTEM
+// ============================================
+
+enum TransactionType {
+  PURCHASE
+  EXAM_UNLOCK
+  REFUND
+  BONUS
+  ADMIN_ADJUSTMENT
+}
+
+model CreditTransaction {
+  id              String          @id @default(uuid())
+  userId          String          @map("user_id")
+  amount          Int             // Positive for add, negative for deduct
+  transactionType TransactionType @map("transaction_type")
+  referenceId     String?         @map("reference_id") // examId or paymentOrderId
+  description     String?
+  balanceAfter    Int             @map("balance_after")
+  createdAt       DateTime        @default(now()) @map("created_at")
+
+  // Relations
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([transactionType])
+  @@map("credit_transactions")
+}
+
+// ============================================
+// PAYMENT SYSTEM
+// ============================================
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  STRIPE
+  PAYPAL
+  BANK_TRANSFER
+  CREDIT_CARD
+}
+
+model PaymentOrder {
+  id              String         @id @default(uuid())
+  userId          String         @map("user_id")
+  amountUSD       Float          @map("amount_usd")
+  creditsPurchased Int           @map("credits_purchased")
+  paymentMethod   PaymentMethod  @map("payment_method")
+  paymentStatus   PaymentStatus  @default(PENDING) @map("payment_status")
+  externalPaymentId String?      @map("external_payment_id") // Stripe/PayPal ID
+  metadata        Json?          // Additional payment data
+  paidAt          DateTime?      @map("paid_at")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  // Relations
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([paymentStatus])
+  @@map("payment_orders")
+}
+
+// ============================================
+// LEARNING PATH
+// ============================================
+
+model LearningPath {
+  id                  String          @id @default(uuid())
+  userId              String          @unique @map("user_id")
+  targetLevel         DifficultyLevel @map("target_level")
+  currentStep         Int             @default(1) @map("current_step")
+  recommendedExams    Json            @map("recommended_exams") // Array of exam IDs
+  completedExamIds    Json            @default("[]") @map("completed_exam_ids")
+  progressPercentage  Float           @default(0) @map("progress_percentage")
+  createdAt           DateTime        @default(now()) @map("created_at")
+  updatedAt           DateTime        @updatedAt @map("updated_at")
+
+  // Relations
+  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("learning_paths")
+}
+
+// ============================================
+// ANALYTICS & STATS (Optional - Future)
+// ============================================
+
+model UserStatistics {
+  id                  String   @id @default(uuid())
+  userId              String   @unique @map("user_id")
+  totalExamsTaken     Int      @default(0) @map("total_exams_taken")
+  totalTimeSpent      Int      @default(0) @map("total_time_spent") // in seconds
+  averageScore        Float?   @map("average_score")
+  strongestSection    ExamSection? @map("strongest_section")
+  weakestSection      ExamSection? @map("weakest_section")
+  currentStreak       Int      @default(0) @map("current_streak")
+  longestStreak       Int      @default(0) @map("longest_streak")
+  lastActivityAt      DateTime? @map("last_activity_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  @@map("user_statistics")
+}
