@@ -12,7 +12,8 @@ import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
 import creditRoutes from './routes/credit.routes';
 import webhookRoutes from './routes/webhook.routes';
-// import examRoutes from './routes/exam.routes';
+import examRoutes from './routes/exam.routes';
+import questionRoutes from './routes/question.routes';
 
 const app: Application = express();
 
@@ -73,7 +74,8 @@ const API_PREFIX = `/api/${env.API_VERSION}`;
 app.use(`${API_PREFIX}/auth`, authRoutes);
 app.use(`${API_PREFIX}/users`, userRoutes);
 app.use(`${API_PREFIX}/credits`, creditRoutes);
-// app.use(`${API_PREFIX}/exams`, examRoutes);
+app.use(`${API_PREFIX}/exams`, examRoutes);
+app.use(`${API_PREFIX}/questions`, questionRoutes);
 
 // Welcome route
 app.get('/', (_req, res) => {
