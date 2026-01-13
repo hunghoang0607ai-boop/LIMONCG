@@ -29,7 +29,7 @@
       "@hooks/*": ["src/hooks/*"],
       "@store/*": ["src/store/*"],
       "@services/*": ["src/services/*"],
-      "@types/*": ["src/types/*"],
+      "@appTypes/*": ["src/types/*"],
       "@utils/*": ["src/utils/*"],
       "@assets/*": ["src/assets/*"],
       "@config/*": ["src/config/*"]

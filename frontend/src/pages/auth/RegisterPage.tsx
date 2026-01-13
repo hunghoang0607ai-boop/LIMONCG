@@ -14,7 +14,7 @@ import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import axios from '@utils/axios';
-import { RegisterData } from '@types/index';
+import { RegisterData } from '@appTypes/index';
 
 interface RegisterFormData extends RegisterData {
   confirmPassword: string;

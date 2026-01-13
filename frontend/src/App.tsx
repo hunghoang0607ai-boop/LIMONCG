@@ -16,12 +16,20 @@ import ProfilePage from '@pages/student/ProfilePage';
 import CreditPurchasePage from '@pages/student/CreditPurchasePage';
 import CreditSuccessPage from '@pages/student/CreditSuccessPage';
 import TransactionHistoryPage from '@pages/student/TransactionHistoryPage';
+import { UserRole } from '@appTypes/index';
 
 // Layout components (to be created)
 import PublicLayout from '@components/layouts/PublicLayout';
 import AuthLayout from '@components/layouts/AuthLayout';
 import StudentLayout from '@components/layouts/StudentLayout';
+import AdminLayout from '@components/layouts/AdminLayout';
 import PrivateRoute from '@components/common/PrivateRoute';
+
+// Resort admin pages
+import ResortDashboardPage from '@pages/admin/resort/ResortDashboardPage';
+import RoomsPage from '@pages/admin/resort/RoomsPage';
+import GuestsPage from '@pages/admin/resort/GuestsPage';
+import ReservationsPage from '@pages/admin/resort/ReservationsPage';
 
 function App() {
   return (
@@ -83,6 +91,20 @@ function App() {
             <Route path="/credits/success" element={<CreditSuccessPage />} />
             <Route path="/credits/history" element={<TransactionHistoryPage />} />
             {/* More student routes will be added here */}
+          </Route>
+
+          {/* Admin Routes - Protected */}
+          <Route
+            element={
+              <PrivateRoute roles={[UserRole.ADMIN]}>
+                <AdminLayout />
+              </PrivateRoute>
+            }
+          >
+            <Route path="/admin/resort" element={<ResortDashboardPage />} />
+            <Route path="/admin/resort/rooms" element={<RoomsPage />} />
+            <Route path="/admin/resort/guests" element={<GuestsPage />} />
+            <Route path="/admin/resort/reservations" element={<ReservationsPage />} />
           </Route>
 
           {/* Catch all - 404 */}

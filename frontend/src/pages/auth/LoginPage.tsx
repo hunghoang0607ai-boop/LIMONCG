@@ -16,7 +16,7 @@ import toast from 'react-hot-toast';
 import { useAppDispatch } from '@store/index';
 import { setCredentials } from '@store/slices/authSlice';
 import axios from '@utils/axios';
-import { LoginCredentials, AuthResponse } from '@types/index';
+import { LoginCredentials, AuthResponse } from '@appTypes/index';
 
 const LoginPage = () => {
   const navigate = useNavigate();
