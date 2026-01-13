@@ -1,4 +1,12 @@
-import { PrismaClient, UserRole, DifficultyLevel, ExamCategory } from '@prisma/client';
+import {
+  PrismaClient,
+  UserRole,
+  DifficultyLevel,
+  ExamCategory,
+  ResortRoomStatus,
+  ResortRoomType,
+  ResortReservationStatus,
+} from '@prisma/client';
 import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
@@ -56,6 +64,58 @@ async function main() {
     },
   });
   console.log('✅ Student user created:', student.email);
+
+  // -------------------------
+  // Small Resort seed data
+  // -------------------------
+  const existingRoomCount = await prisma.resortRoom.count();
+  if (existingRoomCount === 0) {
+    const roomSeed = [
+      { roomNumber: '101', name: 'Garden View', type: ResortRoomType.STANDARD, capacity: 2, baseRateCents: 8900 },
+      { roomNumber: '102', name: 'Pool View', type: ResortRoomType.DELUXE, capacity: 3, baseRateCents: 12900 },
+      { roomNumber: '201', name: 'Family Suite', type: ResortRoomType.SUITE, capacity: 4, baseRateCents: 17900 },
+    ];
+
+    for (const r of roomSeed) {
+      await prisma.resortRoom.create({
+        data: {
+          ...r,
+          status: ResortRoomStatus.AVAILABLE,
+        },
+      });
+    }
+
+    console.log('✅ Resort rooms created:', roomSeed.map((r) => r.roomNumber).join(', '));
+
+    const demoGuest = await prisma.resortGuest.create({
+      data: {
+        fullName: 'Demo Guest',
+        email: 'guest@demo.com',
+        phone: '+1-555-0100',
+        notes: 'Seeded demo guest for resort module.',
+      },
+    });
+
+    const room101 = await prisma.resortRoom.findUnique({ where: { roomNumber: '101' } });
+    if (room101) {
+      await prisma.resortReservation.create({
+        data: {
+          roomId: room101.id,
+          guestId: demoGuest.id,
+          checkInDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
+          checkOutDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+          adults: 2,
+          children: 0,
+          status: ResortReservationStatus.CONFIRMED,
+          totalCents: 8900,
+          notes: 'Seeded demo reservation.',
+        },
+      });
+      console.log('✅ Demo reservation created for room 101');
+    }
+  } else {
+    console.log('ℹ️ Resort rooms already exist, skipping resort seed');
+  }
 
   // Create a demo IELTS exam
   const demoExam = await prisma.exam.create({
