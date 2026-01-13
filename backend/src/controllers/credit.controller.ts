@@ -1,4 +1,4 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { AuthRequest } from '../types';
 import { asyncHandler } from '../utils/asyncHandler';
 import { sendSuccess } from '../utils/response';
@@ -12,7 +12,7 @@ import { createCheckoutSession } from '../services/payment.service';
  * @route   GET /api/v1/credits/packages
  * @access  Public
  */
-export const getCreditPackages = asyncHandler(async (_req, res: Response) => {
+export const getCreditPackages = asyncHandler(async (_req: Request, res: Response) => {
   sendSuccess(res, CREDIT_PACKAGES);
 });
 

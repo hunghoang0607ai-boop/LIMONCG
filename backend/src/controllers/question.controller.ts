@@ -12,7 +12,6 @@ import prisma from '../config/database';
  */
 export const getQuestionsByExam = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { examId } = req.params;
-  const { includeAnswers } = req.query;
 
   // Check if exam exists
   const exam = await prisma.exam.findUnique({

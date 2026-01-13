@@ -6,7 +6,8 @@ import { getCreditPackage, calculatePrice } from '../config/creditPackages';
 // Initialize Stripe (only if key is set)
 const stripe = env.STRIPE_SECRET_KEY
   ? new Stripe(env.STRIPE_SECRET_KEY, {
-      apiVersion: '2024-11-20.acacia',
+      // Keep aligned with Stripe SDK type support
+      apiVersion: '2023-10-16',
     })
   : null;
 
