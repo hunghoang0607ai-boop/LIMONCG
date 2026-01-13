@@ -42,13 +42,13 @@
     "vite-tsconfig-paths": "^4.2.2"
   },
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "lint:fix": "eslint . --ext ts,tsx --fix",
-    "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
-    "type-check": "tsc --noEmit"
+    "dev": "npx vite",
+    "build": "npx tsc && npx vite build",
+    "preview": "npx vite preview",
+    "lint": "npx eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "npx eslint . --ext ts,tsx --fix",
+    "format": "npx prettier --write \"src/**/*.{ts,tsx,css}\"",
+    "type-check": "npx tsc --noEmit"
   },
   "browserslist": {
     "production": [
