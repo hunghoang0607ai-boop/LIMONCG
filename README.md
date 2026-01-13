@@ -22,6 +22,12 @@ A comprehensive online platform for English language testing including IELTS, PT
 - ✅ Analytics and reporting
 - ✅ Transaction management
 
+### Small Resort Operations (MVP)
+- ✅ Room inventory (room number, type, capacity, base rate, status)
+- ✅ Guest list (name/contact/notes)
+- ✅ Reservations (create bookings, prevent date conflicts, update status)
+- ✅ Admin UI at `/admin/resort` (requires an `ADMIN` account)
+
 ## 🏗️ Technology Stack
 
 ### Backend

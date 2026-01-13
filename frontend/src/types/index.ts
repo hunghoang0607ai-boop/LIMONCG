@@ -56,6 +56,9 @@ export interface User {
   credits: number;
   currentLevel?: DifficultyLevel;
   avatar?: string;
+  phone?: string;
+  country?: string;
+  dateOfBirth?: string;
   isEmailVerified: boolean;
   createdAt: string;
 }

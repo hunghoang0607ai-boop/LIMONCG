@@ -1,10 +1,14 @@
 import { Request } from 'express';
 
-export enum UserRole {
-  STUDENT = 'STUDENT',
-  TEACHER = 'TEACHER',
-  ADMIN = 'ADMIN',
-}
+// Keep enums compatible with Prisma string unions by exporting:
+// - a runtime value object for convenience (UserRole.ADMIN)
+// - a string-literal union type for strong typing
+export const UserRole = {
+  STUDENT: 'STUDENT',
+  TEACHER: 'TEACHER',
+  ADMIN: 'ADMIN',
+} as const;
+export type UserRole = (typeof UserRole)[keyof typeof UserRole];
 
 export enum ExamCategory {
   IELTS = 'IELTS',

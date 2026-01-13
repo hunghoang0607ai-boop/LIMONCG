@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Exam, ExamAttempt } from '@types/index';
+import { Exam, ExamAttempt } from '@appTypes/index';
 
 interface ExamState {
   currentExam: Exam | null;

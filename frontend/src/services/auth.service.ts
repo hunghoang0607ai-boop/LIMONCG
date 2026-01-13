@@ -1,5 +1,5 @@
 import axios from '@utils/axios';
-import { AuthResponse, LoginCredentials, RegisterData, User } from '@types/index';
+import { AuthResponse, LoginCredentials, RegisterData, User } from '@appTypes/index';
 
 export const authService = {
   /**

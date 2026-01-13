@@ -1,5 +1,5 @@
 import axios from '@utils/axios';
-import { User } from '@types/index';
+import { User } from '@appTypes/index';
 
 interface UpdateProfileData {
   fullName?: string;

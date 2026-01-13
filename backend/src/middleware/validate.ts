@@ -16,10 +16,6 @@ export const validate = (schema: ZodSchema) => {
       next();
     } catch (error) {
       if (error instanceof z.ZodError) {
-        const errors = error.errors.map((err) => ({
-          field: err.path.join('.'),
-          message: err.message,
-        }));
         throw ApiError.badRequest('Validation failed');
       }
       next(error);

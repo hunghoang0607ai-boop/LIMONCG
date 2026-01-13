@@ -55,7 +55,7 @@ export const handleStripeWebhook = asyncHandler(async (req: Request, res: Respon
       logger.info('Unhandled webhook event type:', event.type);
   }
 
-  sendSuccess(res, { received: true });
+  return sendSuccess(res, { received: true });
 });
 
 /**
