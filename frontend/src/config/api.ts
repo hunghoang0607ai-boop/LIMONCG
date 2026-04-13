@@ -4,12 +4,12 @@ export const API_CONFIG = {
 };
 
 export const APP_CONFIG = {
-  name: import.meta.env.VITE_APP_NAME || 'LIMONCG',
-  description: import.meta.env.VITE_APP_DESCRIPTION || 'English Exam Platform',
+  name: import.meta.env.VITE_APP_NAME || 'LIMONCG CRM',
+  description: import.meta.env.VITE_APP_DESCRIPTION || 'Marketing Agency CRM',
 };
 
 export const STORAGE_KEYS = {
-  ACCESS_TOKEN: 'limoncg_access_token',
-  REFRESH_TOKEN: 'limoncg_refresh_token',
-  USER: 'limoncg_user',
+  ACCESS_TOKEN: 'crm_access_token',
+  REFRESH_TOKEN: 'crm_refresh_token',
+  USER: 'crm_user',
 };

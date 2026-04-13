@@ -1,128 +1,105 @@
 import { useState } from 'react';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
-  Box,
-  Typography,
-  TextField,
-  Button,
-  Link,
-  InputAdornment,
-  IconButton,
-  CircularProgress,
+  Box, Paper, TextField, Button, Typography, InputAdornment, IconButton,
+  Alert, CircularProgress,
 } from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
+import { Visibility, VisibilityOff, TrendingUp } from '@mui/icons-material';
 import { useAppDispatch } from '@store/index';
 import { setCredentials } from '@store/slices/authSlice';
-import axios from '@utils/axios';
-import { LoginCredentials, AuthResponse } from '@types/index';
+import axiosInstance from '@utils/axios';
+import toast from 'react-hot-toast';
 
-const LoginPage = () => {
-  const navigate = useNavigate();
+export default function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPass, setShowPass] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const dispatch = useAppDispatch();
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginCredentials>();
-
-  const onSubmit = async (data: LoginCredentials) => {
-    setIsLoading(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
     try {
-      const response = await axios.post<{ data: AuthResponse }>('/auth/login', data);
-      const { user, accessToken, refreshToken } = response.data.data;
-
+      const res = await axiosInstance.post('/auth/login', { email, password });
+      const { user, accessToken, refreshToken } = res.data.data;
       dispatch(setCredentials({ user, accessToken, refreshToken }));
-      toast.success('Login successful!');
+      toast.success(`Chào mừng, ${user.fullName}!`);
       navigate('/dashboard');
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Login failed');
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Đăng nhập thất bại');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <Box>
-      <Typography variant="h4" align="center" gutterBottom>
-        Welcome Back
-      </Typography>
-      <Typography variant="body2" align="center" color="text.secondary" sx={{ mb: 3 }}>
-        Sign in to continue to LIMONCG
-      </Typography>
-
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <TextField
-          fullWidth
-          label="Email"
-          type="email"
-          margin="normal"
-          {...register('email', {
-            required: 'Email is required',
-            pattern: {
-              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-              message: 'Invalid email address',
-            },
-          })}
-          error={!!errors.email}
-          helperText={errors.email?.message}
-        />
-
-        <TextField
-          fullWidth
-          label="Password"
-          type={showPassword ? 'text' : 'password'}
-          margin="normal"
-          {...register('password', {
-            required: 'Password is required',
-            minLength: {
-              value: 6,
-              message: 'Password must be at least 6 characters',
-            },
-          })}
-          error={!!errors.password}
-          helperText={errors.password?.message}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-
-        <Box sx={{ textAlign: 'right', mt: 1 }}>
-          <Link component={RouterLink} to="/forgot-password" variant="body2">
-            Forgot password?
-          </Link>
+    <Box sx={{ minHeight: '100vh', display: 'flex', bgcolor: '#f5f5f5' }}>
+      {/* Left Panel */}
+      <Box sx={{ display: { xs: 'none', md: 'flex' }, flex: 1, bgcolor: '#1a1a2e', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', p: 6 }}>
+        <Box sx={{ textAlign: 'center', color: 'white', maxWidth: 400 }}>
+          <Box sx={{ width: 72, height: 72, bgcolor: 'primary.main', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 3 }}>
+            <TrendingUp sx={{ fontSize: 40, color: 'white' }} />
+          </Box>
+          <Typography variant="h3" fontWeight={800} mb={2}>LIMONCG CRM</Typography>
+          <Typography variant="h6" color="rgba(255,255,255,0.7)" mb={4}>
+            Nền tảng quản lý khách hàng toàn diện cho marketing agency
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
+            {[{ n: '500+', l: 'Contacts' }, { n: '200+', l: 'Deals' }, { n: '50+', l: 'Projects' }].map(({ n, l }) => (
+              <Box key={l} sx={{ textAlign: 'center' }}>
+                <Typography variant="h4" fontWeight={800} color="primary.light">{n}</Typography>
+                <Typography variant="body2" color="rgba(255,255,255,0.6)">{l}</Typography>
+              </Box>
+            ))}
+          </Box>
         </Box>
+      </Box>
 
-        <Button
-          fullWidth
-          type="submit"
-          variant="contained"
-          size="large"
-          disabled={isLoading}
-          sx={{ mt: 3, mb: 2 }}
-        >
-          {isLoading ? <CircularProgress size={24} /> : 'Sign In'}
-        </Button>
+      {/* Right Panel - Login Form */}
+      <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', p: 4 }}>
+        <Paper elevation={0} sx={{ width: '100%', maxWidth: 420, p: 4, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
+          <Typography variant="h5" fontWeight={700} mb={0.5}>Đăng nhập</Typography>
+          <Typography variant="body2" color="text.secondary" mb={3}>Vui lòng nhập thông tin tài khoản của bạn</Typography>
 
-        <Typography variant="body2" align="center">
-          Don't have an account?{' '}
-          <Link component={RouterLink} to="/register">
-            Sign up
-          </Link>
-        </Typography>
-      </form>
+          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
+          <Box component="form" onSubmit={handleSubmit}>
+            <TextField
+              fullWidth label="Email" type="email" value={email}
+              onChange={(e) => setEmail(e.target.value)} required sx={{ mb: 2 }}
+              autoComplete="email" autoFocus
+            />
+            <TextField
+              fullWidth label="Mật khẩu" value={password}
+              type={showPass ? 'text' : 'password'}
+              onChange={(e) => setPassword(e.target.value)} required sx={{ mb: 3 }}
+              autoComplete="current-password"
+              InputProps={{ endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={() => setShowPass(!showPass)} edge="end">
+                    {showPass ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              )}}
+            />
+            <Button fullWidth variant="contained" size="large" type="submit" disabled={loading}
+              sx={{ py: 1.5, fontWeight: 700, borderRadius: 2 }}>
+              {loading ? <CircularProgress size={24} color="inherit" /> : 'Đăng nhập'}
+            </Button>
+          </Box>
+
+          <Box sx={{ mt: 3, textAlign: 'center' }}>
+            <Typography variant="body2" color="text.secondary">
+              Chưa có tài khoản?{' '}
+              <Link to="/register" style={{ color: '#1976d2', textDecoration: 'none', fontWeight: 600 }}>Đăng ký ngay</Link>
+            </Typography>
+          </Box>
+        </Paper>
+      </Box>
     </Box>
   );
-};
-
-export default LoginPage;
+}

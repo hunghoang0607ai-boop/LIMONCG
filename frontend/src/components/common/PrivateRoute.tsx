@@ -1,18 +1,8 @@
+import { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAppSelector } from '@store/index';
 
-interface PrivateRouteProps {
-  children: React.ReactNode;
+export default function PrivateRoute({ children }: { children: ReactNode }) {
+  const isAuthenticated = useAppSelector((s) => s.auth.isAuthenticated);
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
 }
-
-const PrivateRoute = ({ children }: PrivateRouteProps) => {
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return <>{children}</>;
-};
-
-export default PrivateRoute;

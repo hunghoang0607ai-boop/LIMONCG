@@ -1,152 +1,68 @@
 import { useState } from 'react';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import {
-  Box,
-  Typography,
-  TextField,
-  Button,
-  Link,
-  InputAdornment,
-  IconButton,
-  CircularProgress,
-} from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { useForm } from 'react-hook-form';
+import { useNavigate, Link } from 'react-router-dom';
+import { Box, Paper, TextField, Button, Typography, Alert, CircularProgress, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
+import { useAppDispatch } from '@store/index';
+import { setCredentials } from '@store/slices/authSlice';
+import axiosInstance from '@utils/axios';
 import toast from 'react-hot-toast';
-import axios from '@utils/axios';
-import { RegisterData } from '@types/index';
 
-interface RegisterFormData extends RegisterData {
-  confirmPassword: string;
-}
+const roles = [{ value: 'SALES', label: 'Sales' }, { value: 'MARKETER', label: 'Marketer' }, { value: 'MANAGER', label: 'Manager' }, { value: 'ADMIN', label: 'Admin' }];
 
-const RegisterPage = () => {
+export default function RegisterPage() {
+  const [form, setForm] = useState({ email: '', password: '', fullName: '', role: 'SALES', department: '', phone: '' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm<RegisterFormData>();
+  const handleChange = (field: string) => (e: any) => setForm({ ...form, [field]: e.target.value });
 
-  const password = watch('password');
-
-  const onSubmit = async (data: RegisterFormData) => {
-    setIsLoading(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
     try {
-      const { confirmPassword, ...registerData } = data;
-      await axios.post('/auth/register', registerData);
-      toast.success('Registration successful! Please check your email to verify your account.');
-      navigate('/login');
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Registration failed');
+      const res = await axiosInstance.post('/auth/register', form);
+      const { user, accessToken, refreshToken } = res.data.data;
+      dispatch(setCredentials({ user, accessToken, refreshToken }));
+      toast.success('Đăng ký thành công!');
+      navigate('/dashboard');
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Đăng ký thất bại');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <Box>
-      <Typography variant="h4" align="center" gutterBottom>
-        Create Account
-      </Typography>
-      <Typography variant="body2" align="center" color="text.secondary" sx={{ mb: 3 }}>
-        Join LIMONCG and start your English learning journey
-      </Typography>
-
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <TextField
-          fullWidth
-          label="Full Name"
-          margin="normal"
-          {...register('fullName', {
-            required: 'Full name is required',
-            minLength: {
-              value: 2,
-              message: 'Name must be at least 2 characters',
-            },
-          })}
-          error={!!errors.fullName}
-          helperText={errors.fullName?.message}
-        />
-
-        <TextField
-          fullWidth
-          label="Email"
-          type="email"
-          margin="normal"
-          {...register('email', {
-            required: 'Email is required',
-            pattern: {
-              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-              message: 'Invalid email address',
-            },
-          })}
-          error={!!errors.email}
-          helperText={errors.email?.message}
-        />
-
-        <TextField
-          fullWidth
-          label="Password"
-          type={showPassword ? 'text' : 'password'}
-          margin="normal"
-          {...register('password', {
-            required: 'Password is required',
-            minLength: {
-              value: 6,
-              message: 'Password must be at least 6 characters',
-            },
-          })}
-          error={!!errors.password}
-          helperText={errors.password?.message}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-
-        <TextField
-          fullWidth
-          label="Confirm Password"
-          type={showPassword ? 'text' : 'password'}
-          margin="normal"
-          {...register('confirmPassword', {
-            required: 'Please confirm your password',
-            validate: (value) => value === password || 'Passwords do not match',
-          })}
-          error={!!errors.confirmPassword}
-          helperText={errors.confirmPassword?.message}
-        />
-
-        <Button
-          fullWidth
-          type="submit"
-          variant="contained"
-          size="large"
-          disabled={isLoading}
-          sx={{ mt: 3, mb: 2 }}
-        >
-          {isLoading ? <CircularProgress size={24} /> : 'Create Account'}
-        </Button>
-
-        <Typography variant="body2" align="center">
-          Already have an account?{' '}
-          <Link component={RouterLink} to="/login">
-            Sign in
-          </Link>
-        </Typography>
-      </form>
+    <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#f5f5f5', p: 2 }}>
+      <Paper elevation={0} sx={{ width: '100%', maxWidth: 480, p: 4, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
+        <Typography variant="h5" fontWeight={700} mb={0.5}>Tạo tài khoản</Typography>
+        <Typography variant="body2" color="text.secondary" mb={3}>Điền thông tin để bắt đầu sử dụng CRM</Typography>
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <TextField fullWidth label="Họ và tên" value={form.fullName} onChange={handleChange('fullName')} required autoFocus />
+          <TextField fullWidth label="Email" type="email" value={form.email} onChange={handleChange('email')} required />
+          <TextField fullWidth label="Mật khẩu" type="password" value={form.password} onChange={handleChange('password')} required inputProps={{ minLength: 8 }} />
+          <FormControl fullWidth>
+            <InputLabel>Vai trò</InputLabel>
+            <Select label="Vai trò" value={form.role} onChange={handleChange('role')}>
+              {roles.map(r => <MenuItem key={r.value} value={r.value}>{r.label}</MenuItem>)}
+            </Select>
+          </FormControl>
+          <TextField fullWidth label="Phòng ban" value={form.department} onChange={handleChange('department')} />
+          <TextField fullWidth label="Số điện thoại" value={form.phone} onChange={handleChange('phone')} />
+          <Button fullWidth variant="contained" size="large" type="submit" disabled={loading} sx={{ py: 1.5, fontWeight: 700, borderRadius: 2 }}>
+            {loading ? <CircularProgress size={24} color="inherit" /> : 'Đăng ký'}
+          </Button>
+        </Box>
+        <Box sx={{ mt: 2, textAlign: 'center' }}>
+          <Typography variant="body2" color="text.secondary">
+            Đã có tài khoản?{' '}
+            <Link to="/login" style={{ color: '#1976d2', textDecoration: 'none', fontWeight: 600 }}>Đăng nhập</Link>
+          </Typography>
+        </Box>
+      </Paper>
     </Box>
   );
-};
-
-export default RegisterPage;
+}

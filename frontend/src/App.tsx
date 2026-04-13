@@ -4,89 +4,54 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { Toaster } from 'react-hot-toast';
 import theme from './theme';
 
-// Pages
-import HomePage from '@pages/public/HomePage';
+// Auth pages
 import LoginPage from '@pages/auth/LoginPage';
 import RegisterPage from '@pages/auth/RegisterPage';
-import VerifyEmailPage from '@pages/auth/VerifyEmailPage';
-import ForgotPasswordPage from '@pages/auth/ForgotPasswordPage';
-import ResetPasswordPage from '@pages/auth/ResetPasswordPage';
-import DashboardPage from '@pages/student/DashboardPage';
-import ProfilePage from '@pages/student/ProfilePage';
-import CreditPurchasePage from '@pages/student/CreditPurchasePage';
-import CreditSuccessPage from '@pages/student/CreditSuccessPage';
-import TransactionHistoryPage from '@pages/student/TransactionHistoryPage';
 
-// Layout components (to be created)
-import PublicLayout from '@components/layouts/PublicLayout';
-import AuthLayout from '@components/layouts/AuthLayout';
-import StudentLayout from '@components/layouts/StudentLayout';
+// CRM pages
+import DashboardPage from '@pages/crm/DashboardPage';
+import ContactsPage from '@pages/crm/ContactsPage';
+import CompaniesPage from '@pages/crm/CompaniesPage';
+import DealsPage from '@pages/crm/DealsPage';
+import ProjectsPage from '@pages/crm/ProjectsPage';
+import TasksPage from '@pages/crm/TasksPage';
+import ActivitiesPage from '@pages/crm/ActivitiesPage';
+
+// Layout
+import CRMLayout from '@components/layouts/CRMLayout';
 import PrivateRoute from '@components/common/PrivateRoute';
 
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          duration: 4000,
-          style: {
-            background: '#363636',
-            color: '#fff',
-          },
-          success: {
-            duration: 3000,
-            iconTheme: {
-              primary: '#4caf50',
-              secondary: '#fff',
-            },
-          },
-          error: {
-            duration: 4000,
-            iconTheme: {
-              primary: '#f44336',
-              secondary: '#fff',
-            },
-          },
-        }}
-      />
+      <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
       <BrowserRouter>
         <Routes>
-          {/* Public Routes */}
-          <Route element={<PublicLayout />}>
-            <Route path="/" element={<HomePage />} />
-          </Route>
+          {/* Auth */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
 
-          {/* Auth Routes */}
-          <Route element={<AuthLayout />}>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          </Route>
-
-          {/* Public Auth Routes (no layout) */}
-          <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
-          <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
-
-          {/* Student Routes - Protected */}
+          {/* CRM - Protected */}
           <Route
             element={
               <PrivateRoute>
-                <StudentLayout />
+                <CRMLayout />
               </PrivateRoute>
             }
           >
             <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/credits/purchase" element={<CreditPurchasePage />} />
-            <Route path="/credits/success" element={<CreditSuccessPage />} />
-            <Route path="/credits/history" element={<TransactionHistoryPage />} />
-            {/* More student routes will be added here */}
+            <Route path="/contacts" element={<ContactsPage />} />
+            <Route path="/companies" element={<CompaniesPage />} />
+            <Route path="/deals" element={<DealsPage />} />
+            <Route path="/projects" element={<ProjectsPage />} />
+            <Route path="/tasks" element={<TasksPage />} />
+            <Route path="/activities" element={<ActivitiesPage />} />
           </Route>
 
-          {/* Catch all - 404 */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          {/* Default redirect */}
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

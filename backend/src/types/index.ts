@@ -1,65 +1,68 @@
 import { Request } from 'express';
 
 export enum UserRole {
-  STUDENT = 'STUDENT',
-  TEACHER = 'TEACHER',
   ADMIN = 'ADMIN',
+  MANAGER = 'MANAGER',
+  SALES = 'SALES',
+  MARKETER = 'MARKETER',
 }
 
-export enum ExamCategory {
-  IELTS = 'IELTS',
-  PTE = 'PTE',
-  TOEIC = 'TOEIC',
-  FLYER = 'FLYER',
-  MOVER = 'MOVER',
-  STARTERS = 'STARTERS',
-  KET = 'KET',
-  PET = 'PET',
+export enum ContactStatus {
+  LEAD = 'LEAD',
+  PROSPECT = 'PROSPECT',
+  QUALIFIED = 'QUALIFIED',
+  CLIENT = 'CLIENT',
+  INACTIVE = 'INACTIVE',
 }
 
-export enum QuestionType {
-  MULTIPLE_CHOICE = 'MULTIPLE_CHOICE',
-  FILL_BLANK = 'FILL_BLANK',
-  MATCHING = 'MATCHING',
-  ESSAY = 'ESSAY',
-  TRUE_FALSE = 'TRUE_FALSE',
-  SHORT_ANSWER = 'SHORT_ANSWER',
+export enum ContactSource {
+  WEBSITE = 'WEBSITE',
+  REFERRAL = 'REFERRAL',
+  SOCIAL_MEDIA = 'SOCIAL_MEDIA',
+  EMAIL_CAMPAIGN = 'EMAIL_CAMPAIGN',
+  COLD_OUTREACH = 'COLD_OUTREACH',
+  EVENT = 'EVENT',
+  OTHER = 'OTHER',
 }
 
-export enum ExamSection {
-  READING = 'READING',
-  WRITING = 'WRITING',
-  LISTENING = 'LISTENING',
-  SPEAKING = 'SPEAKING',
+export enum DealStage {
+  PROSPECTING = 'PROSPECTING',
+  QUALIFICATION = 'QUALIFICATION',
+  PROPOSAL = 'PROPOSAL',
+  NEGOTIATION = 'NEGOTIATION',
+  CLOSED_WON = 'CLOSED_WON',
+  CLOSED_LOST = 'CLOSED_LOST',
 }
 
-export enum AttemptStatus {
+export enum ProjectStatus {
+  PLANNING = 'PLANNING',
   IN_PROGRESS = 'IN_PROGRESS',
+  ON_HOLD = 'ON_HOLD',
   COMPLETED = 'COMPLETED',
-  ABANDONED = 'ABANDONED',
+  CANCELLED = 'CANCELLED',
 }
 
-export enum TransactionType {
-  PURCHASE = 'PURCHASE',
-  EXAM_UNLOCK = 'EXAM_UNLOCK',
-  REFUND = 'REFUND',
-  BONUS = 'BONUS',
+export enum TaskPriority {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
+  URGENT = 'URGENT',
 }
 
-export enum PaymentStatus {
-  PENDING = 'PENDING',
-  COMPLETED = 'COMPLETED',
-  FAILED = 'FAILED',
-  REFUNDED = 'REFUNDED',
+export enum TaskStatus {
+  TODO = 'TODO',
+  IN_PROGRESS = 'IN_PROGRESS',
+  DONE = 'DONE',
+  CANCELLED = 'CANCELLED',
 }
 
-export enum DifficultyLevel {
-  A1 = 'A1',
-  A2 = 'A2',
-  B1 = 'B1',
-  B2 = 'B2',
-  C1 = 'C1',
-  C2 = 'C2',
+export enum ActivityType {
+  CALL = 'CALL',
+  EMAIL = 'EMAIL',
+  MEETING = 'MEETING',
+  NOTE = 'NOTE',
+  DEMO = 'DEMO',
+  FOLLOW_UP = 'FOLLOW_UP',
 }
 
 // Express Request with authenticated user
@@ -105,13 +108,6 @@ export interface JwtPayload {
   role: UserRole;
   iat?: number;
   exp?: number;
-}
-
-// Question Options
-export interface QuestionOption {
-  id: string;
-  text: string;
-  isCorrect?: boolean;
 }
 
 // Email

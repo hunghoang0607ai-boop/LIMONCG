@@ -1,5 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Marketing Agency CRM - Prisma Schema
 
 generator client {
   provider = "prisma-client-js"
@@ -15,47 +14,32 @@ datasource db {
 // ============================================
 
 enum UserRole {
-  STUDENT
-  TEACHER
   ADMIN
-}
-
-enum DifficultyLevel {
-  A1
-  A2
-  B1
-  B2
-  C1
-  C2
+  MANAGER
+  SALES
+  MARKETER
 }
 
 model User {
-  id                String    @id @default(uuid())
-  email             String    @unique
-  passwordHash      String    @map("password_hash")
-  fullName          String    @map("full_name")
-  role              UserRole  @default(STUDENT)
-  credits           Int       @default(0)
-  currentLevel      DifficultyLevel? @map("current_level")
-  isEmailVerified   Boolean   @default(false) @map("is_email_verified")
-  emailVerifyToken  String?   @map("email_verify_token")
-  resetPasswordToken String?  @map("reset_password_token")
-  resetPasswordExpires DateTime? @map("reset_password_expires")
-  avatar            String?
-  phone             String?
-  dateOfBirth       DateTime? @map("date_of_birth")
-  country           String?
-  lastLoginAt       DateTime? @map("last_login_at")
-  createdAt         DateTime  @default(now()) @map("created_at")
-  updatedAt         DateTime  @updatedAt @map("updated_at")
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  fullName     String    @map("full_name")
+  role         UserRole  @default(SALES)
+  avatar       String?
+  phone        String?
+  department   String?
+  isActive     Boolean   @default(true) @map("is_active")
+  lastLoginAt  DateTime? @map("last_login_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
 
-  // Relations
-  examAttempts      ExamAttempt[]
-  creditTransactions CreditTransaction[]
-  paymentOrders     PaymentOrder[]
-  learningPath      LearningPath?
-  createdExams      Exam[]       @relation("ExamCreator")
-  refreshTokens     RefreshToken[]
+  refreshTokens RefreshToken[]
+  contacts      Contact[]      @relation("ContactAssignee")
+  deals         Deal[]         @relation("DealAssignee")
+  tasks         Task[]         @relation("TaskAssignee")
+  activities    Activity[]     @relation("ActivityCreator")
+  projects      Project[]      @relation("ProjectManager")
 
   @@map("users")
 }
@@ -73,270 +57,242 @@ model RefreshToken {
 }
 
 // ============================================
-// EXAM MANAGEMENT
+// COMPANIES (Khách hàng doanh nghiệp)
 // ============================================
 
-enum ExamCategory {
-  IELTS
-  PTE
-  TOEIC
-  FLYER
-  MOVER
-  STARTERS
-  KET
-  PET
-  FCE
-  CAE
-  CPE
+enum CompanySize {
+  STARTUP       // 1-10
+  SMALL         // 11-50
+  MEDIUM        // 51-200
+  LARGE         // 201-1000
+  ENTERPRISE    // 1000+
 }
 
-model Exam {
-  id                String         @id @default(uuid())
-  category          ExamCategory
-  title             String
-  description       String?        @db.Text
-  difficultyLevel   DifficultyLevel @map("difficulty_level")
-  durationMinutes   Int            @map("duration_minutes")
-  creditCost        Int            @default(0) @map("credit_cost")
-  isDemo            Boolean        @default(false) @map("is_demo")
-  isPlacementTest   Boolean        @default(false) @map("is_placement_test")
-  totalQuestions    Int            @default(0) @map("total_questions")
-  passingScore      Float          @map("passing_score")
-  thumbnail         String?
-  instructions      String?        @db.Text
-  isPublished       Boolean        @default(false) @map("is_published")
-  createdById       String         @map("created_by_id")
-  createdAt         DateTime       @default(now()) @map("created_at")
-  updatedAt         DateTime       @updatedAt @map("updated_at")
+model Company {
+  id        String      @id @default(uuid())
+  name      String
+  industry  String?
+  website   String?
+  phone     String?
+  email     String?
+  address   String?
+  city      String?
+  country   String?
+  size      CompanySize?
+  revenue   Float?
+  notes     String?     @db.Text
+  logoUrl   String?     @map("logo_url")
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
 
-  // Relations
-  createdBy         User           @relation("ExamCreator", fields: [createdById], references: [id])
-  questions         Question[]
-  examAttempts      ExamAttempt[]
+  contacts  Contact[]
+  deals     Deal[]
+  projects  Project[]
 
-  @@index([category])
-  @@index([isDemo])
-  @@index([isPlacementTest])
-  @@index([isPublished])
-  @@map("exams")
+  @@index([name])
+  @@map("companies")
 }
 
 // ============================================
-// QUESTION BANK
+// CONTACTS (Khách hàng cá nhân / Leads)
 // ============================================
 
-enum QuestionType {
-  MULTIPLE_CHOICE
-  FILL_BLANK
-  MATCHING
-  ESSAY
-  TRUE_FALSE
-  SHORT_ANSWER
-  LISTENING_MCQ
-  READING_MCQ
+enum ContactStatus {
+  LEAD
+  PROSPECT
+  QUALIFIED
+  CLIENT
+  INACTIVE
 }
 
-enum ExamSection {
-  READING
-  WRITING
-  LISTENING
-  SPEAKING
-  GRAMMAR
-  VOCABULARY
+enum ContactSource {
+  WEBSITE
+  REFERRAL
+  SOCIAL_MEDIA
+  EMAIL_CAMPAIGN
+  COLD_OUTREACH
+  EVENT
+  OTHER
 }
 
-model Question {
-  id              String         @id @default(uuid())
-  examId          String         @map("exam_id")
-  section         ExamSection
-  questionType    QuestionType   @map("question_type")
-  questionText    Json           @map("question_text") // Rich text content
-  mediaUrl        String?        @map("media_url") // Audio/Image URL
-  mediaType       String?        @map("media_type") // audio/image/video
-  options         Json?          // Array of options for MCQ
-  correctAnswer   Json           @map("correct_answer") // Correct answer(s)
-  explanation     String?        @db.Text // Explanation for answer
-  points          Float          @default(1)
-  orderIndex      Int            @map("order_index")
-  createdAt       DateTime       @default(now()) @map("created_at")
-  updatedAt       DateTime       @updatedAt @map("updated_at")
+model Contact {
+  id           String        @id @default(uuid())
+  firstName    String        @map("first_name")
+  lastName     String        @map("last_name")
+  email        String?
+  phone        String?
+  jobTitle     String?       @map("job_title")
+  status       ContactStatus @default(LEAD)
+  source       ContactSource @default(OTHER)
+  companyId    String?       @map("company_id")
+  assignedToId String?       @map("assigned_to_id")
+  notes        String?       @db.Text
+  tags         String[]      @default([])
+  linkedinUrl  String?       @map("linkedin_url")
+  avatarUrl    String?       @map("avatar_url")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
 
-  // Relations
-  exam            Exam           @relation(fields: [examId], references: [id], onDelete: Cascade)
-  studentAnswers  StudentAnswer[]
+  company    Company?   @relation(fields: [companyId], references: [id])
+  assignedTo User?      @relation("ContactAssignee", fields: [assignedToId], references: [id])
+  deals      Deal[]
+  activities Activity[]
+  tasks      Task[]
 
-  @@index([examId])
-  @@index([section])
-  @@map("questions")
-}
-
-// ============================================
-// EXAM ATTEMPTS
-// ============================================
-
-enum AttemptStatus {
-  IN_PROGRESS
-  COMPLETED
-  ABANDONED
-}
-
-model ExamAttempt {
-  id                String         @id @default(uuid())
-  userId            String         @map("user_id")
-  examId            String         @map("exam_id")
-  startedAt         DateTime       @default(now()) @map("started_at")
-  submittedAt       DateTime?      @map("submitted_at")
-  totalScore        Float?         @map("total_score")
-  maxScore          Float?         @map("max_score")
-  percentage        Float?
-  timeSpentSeconds  Int?           @map("time_spent_seconds")
-  status            AttemptStatus  @default(IN_PROGRESS)
-
-  // Section scores
-  readingScore      Float?         @map("reading_score")
-  writingScore      Float?         @map("writing_score")
-  listeningScore    Float?         @map("listening_score")
-  speakingScore     Float?         @map("speaking_score")
-  grammarScore      Float?         @map("grammar_score")
-  vocabularyScore   Float?         @map("vocabulary_score")
-
-  // Relations
-  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  exam              Exam           @relation(fields: [examId], references: [id], onDelete: Cascade)
-  studentAnswers    StudentAnswer[]
-
-  @@index([userId])
-  @@index([examId])
   @@index([status])
-  @@map("exam_attempts")
-}
-
-model StudentAnswer {
-  id                String         @id @default(uuid())
-  attemptId         String         @map("attempt_id")
-  questionId        String         @map("question_id")
-  answer            Json           // Student's answer
-  isCorrect         Boolean?       @map("is_correct")
-  pointsEarned      Float          @default(0) @map("points_earned")
-  timeSpentSeconds  Int?           @map("time_spent_seconds")
-  createdAt         DateTime       @default(now()) @map("created_at")
-
-  // Relations
-  attempt           ExamAttempt    @relation(fields: [attemptId], references: [id], onDelete: Cascade)
-  question          Question       @relation(fields: [questionId], references: [id], onDelete: Cascade)
-
-  @@unique([attemptId, questionId])
-  @@index([attemptId])
-  @@map("student_answers")
+  @@index([companyId])
+  @@map("contacts")
 }
 
 // ============================================
-// CREDIT SYSTEM
+// DEALS / PIPELINE (Cơ hội bán hàng)
 // ============================================
 
-enum TransactionType {
-  PURCHASE
-  EXAM_UNLOCK
-  REFUND
-  BONUS
-  ADMIN_ADJUSTMENT
+enum DealStage {
+  PROSPECTING
+  QUALIFICATION
+  PROPOSAL
+  NEGOTIATION
+  CLOSED_WON
+  CLOSED_LOST
 }
 
-model CreditTransaction {
-  id              String          @id @default(uuid())
-  userId          String          @map("user_id")
-  amount          Int             // Positive for add, negative for deduct
-  transactionType TransactionType @map("transaction_type")
-  referenceId     String?         @map("reference_id") // examId or paymentOrderId
-  description     String?
-  balanceAfter    Int             @map("balance_after")
-  createdAt       DateTime        @default(now()) @map("created_at")
+model Deal {
+  id                String    @id @default(uuid())
+  title             String
+  value             Float     @default(0)
+  currency          String    @default("VND")
+  stage             DealStage @default(PROSPECTING)
+  probability       Int       @default(10) // 0-100%
+  expectedCloseDate DateTime? @map("expected_close_date")
+  contactId         String?   @map("contact_id")
+  companyId         String?   @map("company_id")
+  assignedToId      String?   @map("assigned_to_id")
+  notes             String?   @db.Text
+  lostReason        String?   @map("lost_reason")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
 
-  // Relations
-  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contact    Contact?   @relation(fields: [contactId], references: [id])
+  company    Company?   @relation(fields: [companyId], references: [id])
+  assignedTo User?      @relation("DealAssignee", fields: [assignedToId], references: [id])
+  activities Activity[]
+  tasks      Task[]
 
-  @@index([userId])
-  @@index([transactionType])
-  @@map("credit_transactions")
+  @@index([stage])
+  @@index([assignedToId])
+  @@map("deals")
 }
 
 // ============================================
-// PAYMENT SYSTEM
+// PROJECTS (Chiến dịch / Dự án)
 // ============================================
 
-enum PaymentStatus {
-  PENDING
+enum ProjectStatus {
+  PLANNING
+  IN_PROGRESS
+  ON_HOLD
   COMPLETED
-  FAILED
-  REFUNDED
   CANCELLED
 }
 
-enum PaymentMethod {
-  STRIPE
-  PAYPAL
-  BANK_TRANSFER
-  CREDIT_CARD
-}
+model Project {
+  id          String        @id @default(uuid())
+  name        String
+  description String?       @db.Text
+  status      ProjectStatus @default(PLANNING)
+  budget      Float?
+  spent       Float?        @default(0)
+  companyId   String?       @map("company_id")
+  managerId   String?       @map("manager_id")
+  startDate   DateTime?     @map("start_date")
+  endDate     DateTime?     @map("end_date")
+  tags        String[]      @default([])
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
 
-model PaymentOrder {
-  id              String         @id @default(uuid())
-  userId          String         @map("user_id")
-  amountUSD       Float          @map("amount_usd")
-  creditsPurchased Int           @map("credits_purchased")
-  paymentMethod   PaymentMethod  @map("payment_method")
-  paymentStatus   PaymentStatus  @default(PENDING) @map("payment_status")
-  externalPaymentId String?      @map("external_payment_id") // Stripe/PayPal ID
-  metadata        Json?          // Additional payment data
-  paidAt          DateTime?      @map("paid_at")
-  createdAt       DateTime       @default(now()) @map("created_at")
-  updatedAt       DateTime       @updatedAt @map("updated_at")
+  company  Company? @relation(fields: [companyId], references: [id])
+  manager  User?    @relation("ProjectManager", fields: [managerId], references: [id])
+  tasks    Task[]
 
-  // Relations
-  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([paymentStatus])
-  @@map("payment_orders")
+  @@index([status])
+  @@map("projects")
 }
 
 // ============================================
-// LEARNING PATH
+// TASKS (Công việc)
 // ============================================
 
-model LearningPath {
-  id                  String          @id @default(uuid())
-  userId              String          @unique @map("user_id")
-  targetLevel         DifficultyLevel @map("target_level")
-  currentStep         Int             @default(1) @map("current_step")
-  recommendedExams    Json            @map("recommended_exams") // Array of exam IDs
-  completedExamIds    Json            @default("[]") @map("completed_exam_ids")
-  progressPercentage  Float           @default(0) @map("progress_percentage")
-  createdAt           DateTime        @default(now()) @map("created_at")
-  updatedAt           DateTime        @updatedAt @map("updated_at")
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
 
-  // Relations
-  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+  CANCELLED
+}
 
-  @@map("learning_paths")
+model Task {
+  id           String       @id @default(uuid())
+  title        String
+  description  String?      @db.Text
+  priority     TaskPriority @default(MEDIUM)
+  status       TaskStatus   @default(TODO)
+  dueDate      DateTime?    @map("due_date")
+  assignedToId String?      @map("assigned_to_id")
+  contactId    String?      @map("contact_id")
+  dealId       String?      @map("deal_id")
+  projectId    String?      @map("project_id")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  assignedTo User?    @relation("TaskAssignee", fields: [assignedToId], references: [id])
+  contact    Contact? @relation(fields: [contactId], references: [id])
+  deal       Deal?    @relation(fields: [dealId], references: [id])
+  project    Project? @relation(fields: [projectId], references: [id])
+
+  @@index([status])
+  @@index([assignedToId])
+  @@map("tasks")
 }
 
 // ============================================
-// ANALYTICS & STATS (Optional - Future)
+// ACTIVITIES (Nhật ký hoạt động)
 // ============================================
 
-model UserStatistics {
-  id                  String   @id @default(uuid())
-  userId              String   @unique @map("user_id")
-  totalExamsTaken     Int      @default(0) @map("total_exams_taken")
-  totalTimeSpent      Int      @default(0) @map("total_time_spent") // in seconds
-  averageScore        Float?   @map("average_score")
-  strongestSection    ExamSection? @map("strongest_section")
-  weakestSection      ExamSection? @map("weakest_section")
-  currentStreak       Int      @default(0) @map("current_streak")
-  longestStreak       Int      @default(0) @map("longest_streak")
-  lastActivityAt      DateTime? @map("last_activity_at")
-  updatedAt           DateTime @updatedAt @map("updated_at")
+enum ActivityType {
+  CALL
+  EMAIL
+  MEETING
+  NOTE
+  DEMO
+  FOLLOW_UP
+}
 
-  @@map("user_statistics")
+model Activity {
+  id          String       @id @default(uuid())
+  type        ActivityType
+  subject     String
+  description String?      @db.Text
+  scheduledAt DateTime?    @map("scheduled_at")
+  completedAt DateTime?    @map("completed_at")
+  duration    Int?         // minutes
+  contactId   String?      @map("contact_id")
+  dealId      String?      @map("deal_id")
+  createdById String       @map("created_by_id")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  contact   Contact? @relation(fields: [contactId], references: [id])
+  deal      Deal?    @relation(fields: [dealId], references: [id])
+  createdBy User     @relation("ActivityCreator", fields: [createdById], references: [id])
+
+  @@index([type])
+  @@index([contactId])
+  @@map("activities")
 }

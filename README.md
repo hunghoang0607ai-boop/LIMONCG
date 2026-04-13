@@ -1,153 +1,86 @@
-# 🎓 LIMONCG - English Exam Platform
+# LIMONCG Marketing CRM
 
-A comprehensive online platform for English language testing including IELTS, PTE, FLYER, MOVER, TOEIC and more.
+Hệ thống CRM (Customer Relationship Management) dành cho Marketing Agency, xây dựng với Node.js, Express, TypeScript, Prisma và React.
 
-## 📋 Features
+## Tính năng chính
 
-### For Students:
-- ✅ Account registration and authentication
-- ✅ Free placement tests to assess current level
-- ✅ Demo tests for trial
-- ✅ Credit-based exam access system
-- ✅ Take exams: IELTS, PTE, FLYER, MOVER, TOEIC
-- ✅ Detailed results and analytics
-- ✅ Personalized learning paths
-- ✅ Progress tracking
+- **Dashboard** - Tổng quan KPIs: contacts, pipeline value, doanh thu, tasks
+- **Contacts** - Quản lý khách hàng cá nhân (leads, prospects, clients)
+- **Companies** - Quản lý doanh nghiệp khách hàng
+- **Pipeline (Deals)** - Kanban board quản lý cơ hội bán hàng
+- **Projects** - Quản lý chiến dịch và dự án marketing
+- **Tasks** - Quản lý công việc nội bộ team
+- **Activities** - Nhật ký hoạt động (calls, emails, meetings)
 
-### For Admins/Teachers:
-- ✅ User management
-- ✅ Course and lesson creation
-- ✅ Exam and question bank management
-- ✅ Credit pricing configuration
-- ✅ Analytics and reporting
-- ✅ Transaction management
+## Tech Stack
 
-## 🏗️ Technology Stack
+- **Backend**: Node.js + Express + TypeScript + Prisma ORM + PostgreSQL
+- **Frontend**: React 18 + TypeScript + Material UI + Redux Toolkit + Recharts
+- **Database**: PostgreSQL 15
 
-### Backend
-- Node.js 20+
-- Express.js + TypeScript
-- PostgreSQL (Primary Database)
-- Prisma ORM
-- Redis (Caching)
-- JWT Authentication
-- AWS S3 / Cloudinary (File Storage)
+## Cài đặt nhanh
 
-### Frontend
-- React 18 + TypeScript
-- Material-UI (MUI)
-- Redux Toolkit + RTK Query
-- React Router v6
-- React Hook Form + Zod
-- Recharts
+### 1. Clone & cài đặt
 
-### DevOps
-- Docker + Docker Compose
-- GitHub Actions (CI/CD)
-- ESLint + Prettier
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Node.js 20+
-- Docker & Docker Compose
-- PostgreSQL 15+
-- Redis
-
-### Installation
-
-1. Clone the repository
 ```bash
-git clone <repository-url>
-cd LIMONCG
+cd backend && npm install
+cd ../frontend && npm install
 ```
 
-2. Install dependencies
-```bash
-# Backend
-cd backend
-npm install
+### 2. Cấu hình môi trường
 
-# Frontend
-cd ../frontend
-npm install
-```
-
-3. Configure environment variables
 ```bash
-# Copy example env files
 cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env
+# Chỉnh sửa DATABASE_URL, JWT_SECRET, JWT_REFRESH_SECRET
 ```
 
-4. Start with Docker Compose
+### 3. Khởi động database
+
 ```bash
-docker-compose up -d
+docker-compose up -d postgres
 ```
 
-5. Run database migrations
+### 4. Migrate & seed database
+
 ```bash
 cd backend
-npx prisma migrate dev
+npx prisma migrate dev --name init_crm
+npm run prisma:seed
 ```
 
-6. Start development servers
+### 5. Chạy ứng dụng
+
 ```bash
 # Terminal 1 - Backend
-cd backend
-npm run dev
+cd backend && npm run dev
 
 # Terminal 2 - Frontend
-cd frontend
-npm start
+cd frontend && npm run dev
 ```
 
-## 📁 Project Structure
+### Truy cập
 
-```
-LIMONCG/
-├── backend/          # Node.js + Express backend
-├── frontend/         # React frontend
-├── shared/           # Shared types and utilities
-├── docker-compose.yml
-└── README.md
-```
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:5000/api/v1
 
-## 🔧 Development
+### Tài khoản mặc định (sau khi seed)
 
-### Backend API
-- Development: http://localhost:5000
-- API Documentation: http://localhost:5000/api-docs
+| Email | Password | Role |
+|-------|----------|------|
+| admin@limoncg.com | admin123456 | Admin |
+| sales@limoncg.com | sales123456 | Sales |
 
-### Frontend
-- Development: http://localhost:3000
+## API Endpoints
 
-## 📚 Documentation
-
-- [Backend API Documentation](./backend/README.md)
-- [Frontend Documentation](./frontend/README.md)
-- [Database Schema](./backend/prisma/schema.prisma)
-
-## 🧪 Testing
-
-```bash
-# Backend tests
-cd backend
-npm test
-
-# Frontend tests
-cd frontend
-npm test
-```
-
-## 📦 Deployment
-
-[Deployment instructions will be added]
-
-## 📝 License
-
-[License information]
-
-## 👥 Team
-
-[Team information]
+| Method | Endpoint | Mô tả |
+|--------|----------|-------|
+| POST | /api/v1/auth/login | Đăng nhập |
+| POST | /api/v1/auth/register | Đăng ký |
+| GET | /api/v1/dashboard/stats | Dashboard statistics |
+| GET/POST | /api/v1/contacts | Quản lý contacts |
+| GET/POST | /api/v1/companies | Quản lý companies |
+| GET/POST | /api/v1/deals | Quản lý deals |
+| GET | /api/v1/deals/kanban | Pipeline kanban view |
+| GET/POST | /api/v1/projects | Quản lý projects |
+| GET/POST | /api/v1/tasks | Quản lý tasks |
+| GET/POST | /api/v1/activities | Nhật ký hoạt động |

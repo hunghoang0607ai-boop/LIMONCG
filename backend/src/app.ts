@@ -9,87 +9,56 @@ import logger from './config/logger';
 
 // Routes
 import authRoutes from './routes/auth.routes';
-import userRoutes from './routes/user.routes';
-import creditRoutes from './routes/credit.routes';
-import webhookRoutes from './routes/webhook.routes';
-import examRoutes from './routes/exam.routes';
-import questionRoutes from './routes/question.routes';
+import contactRoutes from './routes/contact.routes';
+import companyRoutes from './routes/company.routes';
+import dealRoutes from './routes/deal.routes';
+import projectRoutes from './routes/project.routes';
+import taskRoutes from './routes/task.routes';
+import activityRoutes from './routes/activity.routes';
+import dashboardRoutes from './routes/dashboard.routes';
 
 const app: Application = express();
 
-// Security middleware
 app.use(helmet());
-
-// CORS
-app.use(
-  cors({
-    origin: env.FRONTEND_URL,
-    credentials: true,
-  })
-);
-
-// Webhook routes (before body parser - needs raw body)
-app.use('/api/v1/webhooks', webhookRoutes);
-
-// Body parser
+app.use(cors({ origin: env.FRONTEND_URL, credentials: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// HTTP request logger
 if (env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 } else {
-  app.use(
-    morgan('combined', {
-      stream: {
-        write: (message: string) => logger.info(message.trim()),
-      },
-    })
-  );
+  app.use(morgan('combined', { stream: { write: (msg: string) => logger.info(msg.trim()) } }));
 }
 
-// Rate limiting
 const limiter = rateLimit({
   windowMs: parseInt(env.RATE_LIMIT_WINDOW_MS),
   max: parseInt(env.RATE_LIMIT_MAX_REQUESTS),
-  message: 'Too many requests from this IP, please try again later.',
+  message: 'Too many requests, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
 });
 app.use('/api', limiter);
 
-// Health check
 app.get('/health', (_req, res) => {
-  res.status(200).json({
-    status: 'OK',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: env.NODE_ENV,
-  });
+  res.status(200).json({ status: 'OK', timestamp: new Date().toISOString(), uptime: process.uptime() });
 });
 
-// API Routes
 const API_PREFIX = `/api/${env.API_VERSION}`;
 
 app.use(`${API_PREFIX}/auth`, authRoutes);
-app.use(`${API_PREFIX}/users`, userRoutes);
-app.use(`${API_PREFIX}/credits`, creditRoutes);
-app.use(`${API_PREFIX}/exams`, examRoutes);
-app.use(`${API_PREFIX}/questions`, questionRoutes);
+app.use(`${API_PREFIX}/contacts`, contactRoutes);
+app.use(`${API_PREFIX}/companies`, companyRoutes);
+app.use(`${API_PREFIX}/deals`, dealRoutes);
+app.use(`${API_PREFIX}/projects`, projectRoutes);
+app.use(`${API_PREFIX}/tasks`, taskRoutes);
+app.use(`${API_PREFIX}/activities`, activityRoutes);
+app.use(`${API_PREFIX}/dashboard`, dashboardRoutes);
 
-// Welcome route
 app.get('/', (_req, res) => {
-  res.json({
-    message: 'Welcome to LIMONCG English Exam Platform API',
-    version: env.API_VERSION,
-    docs: `${API_PREFIX}/docs`,
-  });
+  res.json({ message: 'LIMONCG Marketing CRM API', version: env.API_VERSION });
 });
 
-// 404 handler
 app.use(notFound);
-
-// Error handler
 app.use(errorHandler);
 
 export default app;

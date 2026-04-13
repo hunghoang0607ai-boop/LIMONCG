@@ -5,46 +5,26 @@ import { ApiError } from '../utils/ApiError';
 import { asyncHandler } from '../utils/asyncHandler';
 import prisma from '../config/database';
 
-/**
- * Verify JWT token and attach user to request
- */
 export const authenticate = asyncHandler(
   async (req: AuthRequest, _res: Response, next: NextFunction) => {
-    // Get token from header
     const authHeader = req.headers.authorization;
-
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       throw ApiError.unauthorized('No token provided');
     }
 
-    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
-
+    const token = authHeader.substring(7);
     try {
-      // Verify token
       const decoded = verifyAccessToken(token);
-
-      // Check if user still exists
       const user = await prisma.user.findUnique({
         where: { id: decoded.userId },
-        select: {
-          id: true,
-          email: true,
-          role: true,
-          isEmailVerified: true,
-        },
+        select: { id: true, email: true, role: true, isActive: true },
       });
 
-      if (!user) {
-        throw ApiError.unauthorized('User not found');
+      if (!user || !user.isActive) {
+        throw ApiError.unauthorized('User not found or inactive');
       }
 
-      // Attach user to request
-      req.user = {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-      };
-
+      req.user = { id: user.id, email: user.email, role: user.role as UserRole };
       next();
     } catch (error) {
       throw ApiError.unauthorized('Invalid or expired token');
@@ -52,81 +32,10 @@ export const authenticate = asyncHandler(
   }
 );
 
-/**
- * Check if user has required role(s)
- */
 export const authorize = (...roles: UserRole[]) => {
   return asyncHandler(async (req: AuthRequest, _res: Response, next: NextFunction) => {
-    if (!req.user) {
-      throw ApiError.unauthorized('Authentication required');
-    }
-
-    if (!roles.includes(req.user.role)) {
-      throw ApiError.forbidden('You do not have permission to access this resource');
-    }
-
+    if (!req.user) throw ApiError.unauthorized('Authentication required');
+    if (!roles.includes(req.user.role)) throw ApiError.forbidden('Insufficient permissions');
     next();
   });
 };
-
-/**
- * Check if email is verified
- */
-export const requireEmailVerified = asyncHandler(
-  async (req: AuthRequest, _res: Response, next: NextFunction) => {
-    if (!req.user) {
-      throw ApiError.unauthorized('Authentication required');
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: req.user.id },
-      select: { isEmailVerified: true },
-    });
-
-    if (!user?.isEmailVerified) {
-      throw ApiError.forbidden('Please verify your email address first');
-    }
-
-    next();
-  }
-);
-
-/**
- * Optional authentication - doesn't throw error if no token
- */
-export const optionalAuth = asyncHandler(
-  async (req: AuthRequest, _res: Response, next: NextFunction) => {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return next();
-    }
-
-    const token = authHeader.substring(7);
-
-    try {
-      const decoded = verifyAccessToken(token);
-
-      const user = await prisma.user.findUnique({
-        where: { id: decoded.userId },
-        select: {
-          id: true,
-          email: true,
-          role: true,
-        },
-      });
-
-      if (user) {
-        req.user = {
-          id: user.id,
-          email: user.email,
-          role: user.role,
-        };
-      }
-    } catch (error) {
-      // Ignore token errors for optional auth
-    }
-
-    next();
-  }
-);
